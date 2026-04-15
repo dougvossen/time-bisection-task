@@ -67,7 +67,9 @@
   padding: 48px 56px;
   margin-bottom: 28px;
 }
-
+#bx-screen-pre-intro .bx-card > * + * {
+  margin-top: 38px;
+}
   /* ---------- typography ---------- */
 .bx-title {
   font-size: 1.6em;
@@ -84,29 +86,28 @@
 .bx-body {
   font-size: 1em;
   color: var(--text-mid);
-  margin-bottom: 32px;
+  margin-bottom: 0;
 }
 .bx-rule {
-  font-size: 0.95em;
-  color: var(--text-dark);
-  background: #f0ede7;
-  border-left: 4px solid var(--accent);
-  border-radius: 0 6px 6px 0;
-  padding: 16px 18px;
-  margin: 32px 0;
-  line-height: 1.6;
+  font-size: 1em;
+  color: var(--text-mid);
+  background: #f7f4ef;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 40px 0;
+  line-height: 1.75;
 }
 .bx-small {
   font-size: 0.95em;
   color: var(--text-mid);
-  margin-top: 8px;
+  margin-top: 0;
 }
-  hr.bx-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 22px 0;
-  }
-
+hr.bx-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
   /* ---------- buttons ---------- */
   .bx-btn {
     display: inline-block;
@@ -468,7 +469,6 @@
   var TEST_REPS    = 8;
   var TRAIN_EACH   = 6;
   var BREAK_AT     = 28;        // break after this many TEST trials
-  var TIMEOUT_MS   = 3000;
   var FIXATION_MS  = 600;       // fixation cross display time
   var FEEDBACK_MS  = 1000;      // how long training feedback stays
 
@@ -483,7 +483,6 @@
   var activeKeyFn  = null;
   var stimOnset    = 0;
   var responseOpen = false;
-  var timeoutHandle= null;
 
   /* =============================================================
      DOM REFERENCES
