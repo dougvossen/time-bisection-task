@@ -645,12 +645,6 @@
         elResponseArea.style.display = 'block';
         responseOpen = true;
 
-        /* response timeout */
-        timeoutHandle = setTimeout(function () {
-          if (!responseOpen) return;
-          handleResponse(trial, null);
-        }, TIMEOUT_MS);
-
         /* keyboard listener */
         activeKeyFn = function (e) {
           var k = (e.key || '').toLowerCase();
@@ -673,7 +667,6 @@
     if (!responseOpen) return;
     responseOpen = false;
 
-    clearTimeout(timeoutHandle);
     removeActiveKey();
 
     elResponseArea.style.display = 'none';
