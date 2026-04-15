@@ -240,17 +240,16 @@ hr.bx-divider {
     text-align: center;
     padding: 10px 0 2px;
   }
-  .bx-fb-label {
-    font-size: 1.05em;
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-  .bx-fb-sub {
-    font-size: 0.82em;
-    color: var(--text-light);
-  }
-  .bx-fb-correct   { color: var(--correct); }
-  .bx-fb-incorrect { color: var(--incorrect); }
+.bx-fb-label {
+  font-size: 1.05em;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-dark);
+}
+.bx-fb-sub {
+  font-size: 0.95em;
+  color: var(--text-mid);
+}
 
   /* ---------- screens (instruction / break / done) ---------- */
   .bx-screen { display: none; }
@@ -715,18 +714,16 @@ hr.bx-divider {
   /* =============================================================
      TRAINING FEEDBACK
      ============================================================= */
-  function showTrainingFeedback(trial, correct, callback) {
-    var label = trial.duration_ms === SHORT_MS ? 'Short (400 ms)' : 'Long (1600 ms)';
-    var fbClass = correct ? 'bx-fb-correct' : 'bx-fb-incorrect';
-    var fbWord  = correct ? 'Correct' : 'Incorrect';
+function showTrainingFeedback(trial, correct, callback) {
+  var label = trial.duration_ms === SHORT_MS ? 'Short (400 ms)' : 'Long (1600 ms)';
 
-    elFeedback.innerHTML =
-      '<p class="bx-fb-label ' + fbClass + '">' + fbWord + '</p>'
-      + '<p class="bx-fb-sub">That was the <strong>' + label + '</strong> duration.</p>';
-    elFeedback.style.display = 'block';
+  elFeedback.innerHTML =
+    '<p class="bx-fb-label">Reference shown</p>'
+    + '<p class="bx-fb-sub">That was the <strong>' + label + '</strong> duration.</p>';
+  elFeedback.style.display = 'block';
 
-    setTimeout(callback, FEEDBACK_MS);
-  }
+  setTimeout(callback, FEEDBACK_MS);
+}
 
   /* =============================================================
      TRANSITION / BREAK / DONE SCREENS
