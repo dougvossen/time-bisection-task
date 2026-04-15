@@ -1,0 +1,835 @@
+<!--
+  TIME BISECTION TASK  v2
+  ========================
+  Paste this entire block into the Qualtrics question HTML editor.
+
+  TO SWITCH BETWEEN PRE- AND POST-RECALL VERSIONS:
+  Find the line near the top of the <script> section that reads:
+      var TASK_MODE = "pre";
+  Change "pre" to "post" for the post-recall administration.
+
+  Stable element IDs (do not rename):
+    #taskData            hidden textarea that holds the JSON output
+    #bisection-wrapper   outermost container
+
+  Public API (called by the Qualtrics question JS):
+    window.getTaskDataJson()   returns the JSON string
+    window.isBisectionDone()   returns true when all trials are finished
+    window.onBisectionComplete callback invoked on task completion
+-->
+
+<!-- ============================================================
+     STYLES
+     Clean, calm, clinical-research aesthetic.
+     Warm off-white background, humanistic sans-serif,
+     generous whitespace, minimal colour accent.
+     ============================================================ -->
+<style>
+  /* ---------- design tokens ---------- */
+  :root {
+    --bg:          #f5f3ef;
+    --surface:     #ffffff;
+    --border:      #ddd9d1;
+    --text-dark:   #1e1c19;
+    --text-mid:    #5a5650;
+    --text-light:  #9b968e;
+    --accent:      #3d6b8e;
+    --accent-dark: #2d5070;
+    --correct:     #2d7a4f;
+    --incorrect:   #b5381e;
+    --stimulus-bg: #1a1a22;
+    --radius:      10px;
+    --shadow:      0 2px 16px rgba(0,0,0,0.08);
+  }
+
+  /* ---------- reset / base ---------- */
+  #bisection-wrapper * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  #bisection-wrapper {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    color: var(--text-dark);
+    background: var(--bg);
+    padding: 32px 16px 40px;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ---------- card shell ---------- */
+  .bx-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px 44px;
+    margin-bottom: 16px;
+  }
+
+  /* ---------- typography ---------- */
+  .bx-title {
+    font-size: 1.25em;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+  .bx-lead {
+    font-size: 1em;
+    color: var(--text-mid);
+    margin-bottom: 14px;
+  }
+  .bx-body {
+    font-size: 0.92em;
+    color: var(--text-mid);
+    margin-bottom: 10px;
+  }
+  .bx-rule {
+    font-size: 0.9em;
+    color: var(--text-dark);
+    background: #f0ede7;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    padding: 10px 14px;
+    margin: 14px 0;
+  }
+  .bx-small {
+    font-size: 0.82em;
+    color: var(--text-light);
+  }
+  hr.bx-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 22px 0;
+  }
+
+  /* ---------- buttons ---------- */
+  .bx-btn {
+    display: inline-block;
+    font-family: inherit;
+    font-size: 0.92em;
+    font-weight: 500;
+    padding: 11px 28px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.08s;
+    border: none;
+    outline: none;
+  }
+  .bx-btn:active { transform: scale(0.97); }
+  .bx-btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .bx-btn-primary:hover { background: var(--accent-dark); }
+  .bx-btn-outline {
+    background: #fff;
+    color: var(--text-dark);
+    border: 1px solid var(--border);
+  }
+  .bx-btn-outline:hover { background: var(--bg); }
+
+  /* ---------- progress bar ---------- */
+  #bx-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  #bx-progress-bar-bg {
+    flex: 1;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  #bx-progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.35s ease;
+    width: 0%;
+  }
+  #bx-progress-label {
+    font-size: 0.78em;
+    color: var(--text-light);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- stimulus arena ---------- */
+  #bx-arena {
+    background: var(--stimulus-bg);
+    border-radius: 8px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #bx-fixation {
+    font-family: monospace;
+    font-size: 2.2em;
+    color: #c8c4bc;
+    user-select: none;
+    display: none;
+  }
+  #bx-circle {
+    width: 100px;
+    height: 100px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: none;
+  }
+
+  /* ---------- response buttons ---------- */
+  #bx-response-area {
+    display: none;
+    margin-top: 18px;
+    text-align: center;
+  }
+  #bx-response-area .bx-response-hint {
+    font-size: 0.8em;
+    color: var(--text-light);
+    margin-bottom: 12px;
+  }
+  .bx-response-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+  .bx-resp-btn {
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: 600;
+    width: 160px;
+    padding: 16px 0;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: #fff;
+    color: var(--text-dark);
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background 0.12s, border-color 0.12s, transform 0.08s;
+  }
+  .bx-resp-btn:hover {
+    background: var(--bg);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+  }
+  .bx-resp-btn:active { transform: scale(0.96); }
+  .bx-resp-btn .bx-resp-key {
+    display: block;
+    font-size: 0.65em;
+    font-weight: 400;
+    color: var(--text-light);
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- feedback ---------- */
+  #bx-feedback-area {
+    display: none;
+    text-align: center;
+    padding: 10px 0 2px;
+  }
+  .bx-fb-label {
+    font-size: 1.05em;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .bx-fb-sub {
+    font-size: 0.82em;
+    color: var(--text-light);
+  }
+  .bx-fb-correct   { color: var(--correct); }
+  .bx-fb-incorrect { color: var(--incorrect); }
+
+  /* ---------- screens (instruction / break / done) ---------- */
+  .bx-screen { display: none; }
+  .bx-screen.active { display: block; }
+  .bx-screen-actions {
+    margin-top: 28px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* ---------- task screen (arena + response) ---------- */
+  #bx-task-screen { display: none; }
+  #bx-task-screen.active { display: block; }
+
+  /* hidden data store */
+  #taskData { display: none; }
+</style>
+
+<!-- ============================================================
+     HTML STRUCTURE
+     ============================================================ -->
+<div id="bisection-wrapper">
+
+  <!-- ── PRE: full instruction screen ─────────────────────────── -->
+  <div id="bx-screen-pre-intro" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Timing Task</p>
+      <p class="bx-lead">
+        In this task, you will see a white circle appear briefly in the center
+        of a dark box, then disappear. Your job is to judge how long the circle
+        was visible.
+      </p>
+      <p class="bx-body">
+        You do not need to estimate the exact number of seconds.
+        Instead, you will compare what you saw to two reference durations —
+        a <strong>Short</strong> duration and a <strong>Long</strong> duration —
+        and decide which one the circle felt closer to.
+      </p>
+      <div class="bx-rule">
+        After each circle disappears, press <strong>S</strong> or click
+        <strong>Short</strong> if it felt closer to the short duration.
+        Press <strong>L</strong> or click <strong>Long</strong> if it felt
+        closer to the long duration.
+      </div>
+      <p class="bx-body">
+        We will start with a short practice round. You will see clear examples
+        of both the Short and the Long reference durations, with feedback after
+        each one so you can get a feel for the task before it begins.
+      </p>
+      <p class="bx-body">
+        There are no trick questions. Just respond with your honest first
+        impression on every trial — do not overthink it.
+      </p>
+      <hr class="bx-divider">
+      <p class="bx-small">
+        Respond as quickly and accurately as you can. If you are ready
+        to begin the practice, click the button below.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-pre-intro-btn">
+          Start Practice
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── POST: brief reminder screen ──────────────────────────── -->
+  <div id="bx-screen-post-intro" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Timing Task — Second Round</p>
+      <p class="bx-lead">
+        You are about to complete the same timing task again.
+      </p>
+      <div class="bx-rule">
+        A white circle will appear briefly. Press <strong>S</strong> or click
+        <strong>Short</strong> if it felt short.
+        Press <strong>L</strong> or click <strong>Long</strong> if it felt long.
+      </div>
+      <p class="bx-body">
+        Respond with your honest first impression on every trial.
+        There is no practice this time — the main task will begin immediately.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-post-intro-btn">
+          Begin Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Transition: practice → main test ─────────────────────── -->
+  <div id="bx-screen-transition" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Practice Complete</p>
+      <p class="bx-lead">
+        Good work. You have now seen examples of both reference durations.
+      </p>
+      <p class="bx-body">
+        The main task works the same way, but the circle durations will vary
+        from trial to trial. Some will feel clearly short or long; others will
+        fall somewhere in between. There is no right or wrong answer for the
+        in-between ones — just go with your best judgment.
+      </p>
+      <p class="bx-body">
+        The task includes a brief rest halfway through.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-transition-btn">
+          Begin Main Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Halfway break ─────────────────────────────────────────── -->
+  <div id="bx-screen-break" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Halfway Point — Optional Break</p>
+      <p class="bx-lead">
+        You are halfway through the main task. Feel free to take a short
+        break before continuing.
+      </p>
+      <p class="bx-body">
+        When you are ready to continue, click the button below.
+        The task will resume exactly where you left off.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-break-btn">
+          Continue Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Task complete ─────────────────────────────────────────── -->
+  <div id="bx-screen-done" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Task Complete</p>
+      <p class="bx-lead">
+        Thank you — you have finished the timing task.
+      </p>
+      <p class="bx-body">
+        Please click the <strong>Next</strong> button below to continue
+        with the rest of the survey.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Active trial screen ───────────────────────────────────── -->
+  <div id="bx-task-screen">
+
+    <!-- progress -->
+    <div id="bx-progress-wrap">
+      <div id="bx-progress-bar-bg">
+        <div id="bx-progress-bar-fill"></div>
+      </div>
+      <span id="bx-progress-label">Trial 0 / 0</span>
+    </div>
+
+    <!-- stimulus card -->
+    <div class="bx-card" style="padding: 24px;">
+      <div id="bx-arena">
+        <span id="bx-fixation">+</span>
+        <div id="bx-circle"></div>
+      </div>
+    </div>
+
+    <!-- response area (shown after stimulus) -->
+    <div id="bx-response-area">
+      <p class="bx-response-hint">Which was it closer to?</p>
+      <div class="bx-response-btns">
+        <button class="bx-resp-btn" id="bx-btn-short">
+          Short
+          <span class="bx-resp-key">Key S</span>
+        </button>
+        <button class="bx-resp-btn" id="bx-btn-long">
+          Long
+          <span class="bx-resp-key">Key L</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- feedback (training only) -->
+    <div id="bx-feedback-area"></div>
+
+  </div><!-- /bx-task-screen -->
+
+</div><!-- /bisection-wrapper -->
+
+<!-- hidden output store -->
+<textarea id="taskData"></textarea>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function () {
+
+  /* =============================================================
+     CONFIGURATION
+     Change TASK_MODE to "post" for the post-recall administration.
+     ============================================================= */
+  var TASK_MODE = "pre";   // "pre" or "post"
+
+  /* =============================================================
+     TASK PARAMETERS  (do not change)
+     ============================================================= */
+  var SHORT_MS     = 400;
+  var LONG_MS      = 1600;
+  var TEST_DURS    = [400, 600, 800, 1000, 1200, 1400, 1600];
+  var TEST_REPS    = 8;
+  var TRAIN_EACH   = 6;
+  var BREAK_AT     = 28;        // break after this many TEST trials
+  var TIMEOUT_MS   = 3000;
+  var FIXATION_MS  = 600;       // fixation cross display time
+  var FEEDBACK_MS  = 1000;      // how long training feedback stays
+
+  /* =============================================================
+     STATE
+     ============================================================= */
+  var allTrials    = [];
+  var trialData    = [];
+  var trialIndex   = 0;
+  var trainCount   = 0;
+  var taskDone     = false;
+  var activeKeyFn  = null;
+  var stimOnset    = 0;
+  var responseOpen = false;
+  var timeoutHandle= null;
+
+  /* =============================================================
+     DOM REFERENCES
+     ============================================================= */
+  var elPreIntro    = document.getElementById('bx-screen-pre-intro');
+  var elPostIntro   = document.getElementById('bx-screen-post-intro');
+  var elTransition  = document.getElementById('bx-screen-transition');
+  var elBreak       = document.getElementById('bx-screen-break');
+  var elDone        = document.getElementById('bx-screen-done');
+  var elTaskScreen  = document.getElementById('bx-task-screen');
+  var elArena       = document.getElementById('bx-arena');
+  var elFixation    = document.getElementById('bx-fixation');
+  var elCircle      = document.getElementById('bx-circle');
+  var elResponseArea= document.getElementById('bx-response-area');
+  var elFeedback    = document.getElementById('bx-feedback-area');
+  var elProgressFill= document.getElementById('bx-progress-bar-fill');
+  var elProgressLbl = document.getElementById('bx-progress-label');
+  var elTaskData    = document.getElementById('taskData');
+  var elBtnShort    = document.getElementById('bx-btn-short');
+  var elBtnLong     = document.getElementById('bx-btn-long');
+
+  /* =============================================================
+     SCREEN MANAGEMENT
+     ============================================================= */
+  var allScreens = [
+    elPreIntro, elPostIntro, elTransition, elBreak, elDone, elTaskScreen
+  ];
+
+  function showScreen(el) {
+    allScreens.forEach(function (s) {
+      if (s === elTaskScreen) {
+        s.style.display = 'none';
+      } else {
+        s.classList.remove('active');
+      }
+    });
+    if (el === elTaskScreen) {
+      el.style.display = 'block';
+    } else {
+      el.classList.add('active');
+    }
+  }
+
+  /* =============================================================
+     UTILITY — shuffle array in place (Fisher-Yates)
+     ============================================================= */
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  /* =============================================================
+     TRIAL BUILDING
+     ============================================================= */
+  function buildTrials() {
+    /* Training trials — only in pre mode */
+    var train = [];
+    if (TASK_MODE === "pre") {
+      for (var i = 0; i < TRAIN_EACH; i++) {
+        train.push({ phase: 'train', duration_ms: SHORT_MS });
+      }
+      for (var i = 0; i < TRAIN_EACH; i++) {
+        train.push({ phase: 'train', duration_ms: LONG_MS });
+      }
+      shuffle(train);
+    }
+    trainCount = train.length;
+
+    /* Test trials */
+    var test = [];
+    for (var d = 0; d < TEST_DURS.length; d++) {
+      for (var r = 0; r < TEST_REPS; r++) {
+        test.push({ phase: 'test', duration_ms: TEST_DURS[d] });
+      }
+    }
+    shuffle(test);
+
+    return train.concat(test);
+  }
+
+  /* =============================================================
+     PROGRESS BAR
+     ============================================================= */
+  function updateProgress() {
+    var total = allTrials.length;
+    var pct   = total > 0 ? Math.round((trialIndex / total) * 100) : 0;
+    elProgressFill.style.width = pct + '%';
+    elProgressLbl.textContent  = 'Trial ' + (trialIndex + 1) + ' / ' + total;
+  }
+
+  /* =============================================================
+     KEY LISTENER MANAGEMENT
+     ============================================================= */
+  function removeActiveKey() {
+    if (activeKeyFn) {
+      document.removeEventListener('keydown', activeKeyFn);
+      activeKeyFn = null;
+    }
+  }
+
+  /* =============================================================
+     MAIN FLOW CONTROLLER
+     ============================================================= */
+  function advance() {
+    elResponseArea.style.display  = 'none';
+    elFeedback.style.display      = 'none';
+    elFeedback.innerHTML          = '';
+    responseOpen                  = false;
+
+    /* All trials done */
+    if (trialIndex >= allTrials.length) {
+      finishTask();
+      return;
+    }
+
+    /* Switch from training to test */
+    if (trialIndex === trainCount && TASK_MODE === "pre") {
+      showTransitionScreen();
+      return;
+    }
+
+    /* Halfway break */
+    var testsDone = trialIndex - trainCount;
+    if (testsDone === BREAK_AT) {
+      showBreakScreen();
+      return;
+    }
+
+    runTrial();
+  }
+
+  /* =============================================================
+     SINGLE TRIAL
+     ============================================================= */
+  function runTrial() {
+    showScreen(elTaskScreen);
+    updateProgress();
+
+    var trial = allTrials[trialIndex];
+
+    /* --- step 1: show fixation cross --- */
+    elFixation.style.display = 'block';
+    elCircle.style.display   = 'none';
+
+    setTimeout(function () {
+
+      /* --- step 2: hide fixation, show circle --- */
+      elFixation.style.display = 'none';
+      elCircle.style.display   = 'block';
+      stimOnset = performance.now();
+
+      setTimeout(function () {
+
+        /* --- step 3: hide circle, open response window --- */
+        elCircle.style.display  = 'none';
+        elResponseArea.style.display = 'block';
+        responseOpen = true;
+
+        /* response timeout */
+        timeoutHandle = setTimeout(function () {
+          if (!responseOpen) return;
+          handleResponse(trial, null);
+        }, TIMEOUT_MS);
+
+        /* keyboard listener */
+        activeKeyFn = function (e) {
+          var k = (e.key || '').toLowerCase();
+          if (k !== 's' && k !== 'l') return;
+          if (!responseOpen) return;
+          handleResponse(trial, k);
+        };
+        document.addEventListener('keydown', activeKeyFn);
+
+      }, trial.duration_ms);
+
+    }, FIXATION_MS);
+  }
+
+  /* =============================================================
+     RESPONSE HANDLER
+     (called by keyboard listener OR on-screen button click)
+     ============================================================= */
+  function handleResponse(trial, key) {
+    if (!responseOpen) return;
+    responseOpen = false;
+
+    clearTimeout(timeoutHandle);
+    removeActiveKey();
+
+    elResponseArea.style.display = 'none';
+
+    /* Calculate RT from stimulus onset */
+    var now = performance.now();
+    var rt  = (key === null) ? null : Math.round(now - stimOnset);
+    if (rt !== null && rt < 0) rt = 0;
+
+    var respClass = (key === null) ? null : (key === 's' ? 'short' : 'long');
+
+    /* Correctness — training trials only */
+    var correct = null;
+    if (trial.phase === 'train') {
+      if (key === null) {
+        correct = false;
+      } else {
+        correct = (trial.duration_ms === SHORT_MS) ? (key === 's') : (key === 'l');
+      }
+    }
+
+    /* Record the trial */
+    trialData.push({
+      task_mode:      TASK_MODE,
+      phase:          trial.phase,
+      trial_index:    trialIndex,
+      duration_ms:    trial.duration_ms,
+      response_key:   key,
+      response_class: respClass,
+      correct:        correct,
+      rt_ms:          rt,
+      timestamp:      new Date().toISOString()
+    });
+
+    trialIndex++;
+
+    /* Show feedback for training trials */
+    if (trial.phase === 'train') {
+      showTrainingFeedback(trial, correct, function () {
+        advance();
+      });
+    } else {
+      advance();
+    }
+  }
+
+  /* =============================================================
+     TRAINING FEEDBACK
+     ============================================================= */
+  function showTrainingFeedback(trial, correct, callback) {
+    var label = trial.duration_ms === SHORT_MS ? 'Short (400 ms)' : 'Long (1600 ms)';
+    var fbClass = correct ? 'bx-fb-correct' : 'bx-fb-incorrect';
+    var fbWord  = correct ? 'Correct' : 'Incorrect';
+
+    elFeedback.innerHTML =
+      '<p class="bx-fb-label ' + fbClass + '">' + fbWord + '</p>'
+      + '<p class="bx-fb-sub">That was the <strong>' + label + '</strong> duration.</p>';
+    elFeedback.style.display = 'block';
+
+    setTimeout(callback, FEEDBACK_MS);
+  }
+
+  /* =============================================================
+     TRANSITION / BREAK / DONE SCREENS
+     ============================================================= */
+  function showTransitionScreen() {
+    showScreen(elTransition);
+  }
+
+  function showBreakScreen() {
+    showScreen(elBreak);
+  }
+
+  function finishTask() {
+    taskDone = true;
+    elTaskData.value = JSON.stringify(trialData);
+    showScreen(elDone);
+    if (typeof window.onBisectionComplete === 'function') {
+      window.onBisectionComplete();
+    }
+  }
+
+  /* =============================================================
+     ON-SCREEN BUTTON CLICKS
+     ============================================================= */
+  elBtnShort.addEventListener('click', function () {
+    if (!responseOpen) return;
+    handleResponse(allTrials[trialIndex], 's');
+  });
+
+  elBtnLong.addEventListener('click', function () {
+    if (!responseOpen) return;
+    handleResponse(allTrials[trialIndex], 'l');
+  });
+
+  /* =============================================================
+     INSTRUCTION / TRANSITION BUTTON CLICKS
+     ============================================================= */
+  document.getElementById('bx-pre-intro-btn').addEventListener('click', function () {
+    allTrials  = buildTrials();
+    trialIndex = 0;
+    trialData  = [];
+    showScreen(elTaskScreen);
+    advance();
+  });
+
+  document.getElementById('bx-post-intro-btn').addEventListener('click', function () {
+    allTrials  = buildTrials();
+    trialIndex = 0;
+    trialData  = [];
+    showScreen(elTaskScreen);
+    advance();
+  });
+
+  document.getElementById('bx-transition-btn').addEventListener('click', function () {
+    showScreen(elTaskScreen);
+    advance();
+  });
+
+  document.getElementById('bx-break-btn').addEventListener('click', function () {
+    showScreen(elTaskScreen);
+    advance();
+  });
+
+  /* =============================================================
+     SPACE BAR SHORTCUT on transition / break screens
+     ============================================================= */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== ' ' && e.code !== 'Space') return;
+
+    var transActive = elTransition.classList.contains('active');
+    var breakActive = elBreak.classList.contains('active');
+
+    if (transActive) {
+      document.getElementById('bx-transition-btn').click();
+    }
+    if (breakActive) {
+      document.getElementById('bx-break-btn').click();
+    }
+  });
+
+  /* =============================================================
+     PUBLIC API
+     ============================================================= */
+  window.getTaskDataJson = function () {
+    return elTaskData.value || '[]';
+  };
+
+  window.isBisectionDone = function () {
+    return taskDone;
+  };
+
+  /* =============================================================
+     INITIALISE — show the correct intro screen
+     ============================================================= */
+  if (TASK_MODE === "pre") {
+    showScreen(elPreIntro);
+  } else {
+    showScreen(elPostIntro);
+  }
+
+})();
+</script>
