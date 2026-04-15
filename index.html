@@ -69,23 +69,23 @@
 }
 
   /* ---------- typography ---------- */
-  .bx-title {
-    font-size: 1.25em;
-    font-weight: 600;
-    color: var(--text-dark);
-    margin-bottom: 18px;
-    letter-spacing: -0.01em;
-  }
-  .bx-lead {
-    font-size: 1em;
-    color: var(--text-mid);
-    margin-bottom: 14px;
-  }
-  .bx-body {
-    font-size: 0.92em;
-    color: var(--text-mid);
-    margin-bottom: 10px;
-  }
+.bx-title {
+  font-size: 1.45em;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 26px;
+  letter-spacing: -0.01em;
+}
+.bx-lead {
+  font-size: 1em;
+  color: var(--text-mid);
+  margin-bottom: 22px;
+}
+.bx-body {
+  font-size: 1em;
+  color: var(--text-mid);
+  margin-bottom: 20px;
+}
   .bx-rule {
     font-size: 0.9em;
     color: var(--text-dark);
@@ -95,10 +95,11 @@
     padding: 10px 14px;
     margin: 14px 0;
   }
-  .bx-small {
-    font-size: 0.82em;
-    color: var(--text-light);
-  }
+.bx-small {
+  font-size: 0.95em;
+  color: var(--text-mid);
+  margin-top: 8px;
+}
   hr.bx-divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -273,47 +274,50 @@
 <div id="bisection-wrapper">
 
   <!-- ── PRE: full instruction screen ─────────────────────────── -->
-  <div id="bx-screen-pre-intro" class="bx-screen">
-    <div class="bx-card">
-      <p class="bx-title">Timing Task</p>
-      <p class="bx-lead">
-        In this task, you will see a white circle appear briefly in the center
-        of a dark box, then disappear. Your job is to judge how long the circle
-        was visible.
-      </p>
-      <p class="bx-body">
-        You do not need to estimate the exact number of seconds.
-        Instead, you will compare what you saw to two reference durations —
-        a <strong>Short</strong> duration and a <strong>Long</strong> duration —
-        and decide which one the circle felt closer to.
-      </p>
-      <div class="bx-rule">
-        After each circle disappears, press <strong>S</strong> or click
-        <strong>Short</strong> if it felt closer to the short duration.
-        Press <strong>L</strong> or click <strong>Long</strong> if it felt
-        closer to the long duration.
-      </div>
-      <p class="bx-body">
-        We will start with a short practice round. You will see clear examples
-        of both the Short and the Long reference durations, with feedback after
-        each one so you can get a feel for the task before it begins.
-      </p>
-      <p class="bx-body">
-        There are no trick questions. Just respond with your honest first
-        impression on every trial — do not overthink it.
-      </p>
-      <hr class="bx-divider">
-      <p class="bx-small">
-        Respond as quickly and accurately as you can. If you are ready
-        to begin the practice, click the button below.
-      </p>
-      <div class="bx-screen-actions">
-        <button class="bx-btn bx-btn-primary" id="bx-pre-intro-btn">
-          Start Practice
-        </button>
-      </div>
+<div id="bx-screen-pre-intro" class="bx-screen">
+  <div class="bx-card">
+    <p class="bx-title">Timing Task</p>
+
+    <p class="bx-body">
+      In this task, you will see a white circle appear briefly in the center of a dark box and then disappear.
+      Your job is to decide how long the circle was visible.
+    </p>
+
+    <p class="bx-body">
+      You do not need to estimate the exact number of seconds.
+      Instead, you will compare what you saw to two reference durations: a <strong>Short</strong> duration and a <strong>Long</strong> duration.
+      Your job is to decide which one the circle felt closer to.
+    </p>
+
+    <div class="bx-rule">
+      After each circle disappears, press <strong>S</strong> or click <strong>Short</strong> if it felt closer to the short duration.
+      Press <strong>L</strong> or click <strong>Long</strong> if it felt closer to the long duration.
+    </div>
+
+    <p class="bx-body">
+      We will start with a short practice round.
+      You will see clear examples of both the Short and the Long reference durations, with feedback after each one.
+    </p>
+
+    <p class="bx-body">
+      There are no trick questions.
+      Please respond based on your honest first impression and try not to overthink it.
+    </p>
+
+    <hr class="bx-divider">
+
+    <p class="bx-small">
+      Respond as quickly and accurately as you can.
+      When you are ready to begin the practice round, click the button below.
+    </p>
+
+    <div class="bx-screen-actions">
+      <button class="bx-btn bx-btn-primary" id="bx-pre-intro-btn">
+        Start Practice
+      </button>
     </div>
   </div>
+</div>
 
   <!-- ── POST: brief reminder screen ──────────────────────────── -->
   <div id="bx-screen-post-intro" class="bx-screen">
