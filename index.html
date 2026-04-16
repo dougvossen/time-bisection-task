@@ -857,7 +857,29 @@ function showTrainingFeedback(trial, correct, callback) {
 document.getElementById('bx-pre-intro-btn').addEventListener('click', function () {
   showScreen(elDemoShort);
 });
+document.getElementById('bx-demo-short-btn').addEventListener('click', function () {
+  runReferenceDemo(SHORT_MS, function () {
+    showScreen(elDemoShortSeen);
+  });
+});
 
+document.getElementById('bx-demo-short-next-btn').addEventListener('click', function () {
+  showScreen(elDemoLong);
+});
+
+document.getElementById('bx-demo-long-btn').addEventListener('click', function () {
+  runReferenceDemo(LONG_MS, function () {
+    showScreen(elDemoLongSeen);
+  });
+});
+
+document.getElementById('bx-demo-long-next-btn').addEventListener('click', function () {
+  allTrials  = buildTrials();
+  trialIndex = 0;
+  trialData  = [];
+  showScreen(elTaskScreen);
+  advance();
+});
   document.getElementById('bx-post-intro-btn').addEventListener('click', function () {
     allTrials  = buildTrials();
     trialIndex = 0;
