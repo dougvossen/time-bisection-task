@@ -319,7 +319,64 @@ hr.bx-divider {
     </div>
   </div>
 </div>
+    <div id="bx-screen-demo-short-seen" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Short Reference</p>
+      <p class="bx-body">
+        The duration you just saw was the <strong>SHORT</strong> reference duration.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-demo-short-next-btn">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
 
+  <div id="bx-screen-demo-long-seen" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Long Reference</p>
+      <p class="bx-body">
+        The duration you just saw was the <strong>LONG</strong> reference duration.
+      </p>
+      <p class="bx-body">
+        You will now begin the practice round.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-demo-long-next-btn">
+          Begin Practice
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ── PRE: anchor demo screens ───────────────────────────── -->
+  <div id="bx-screen-demo-short" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Reference Example 1 of 2</p>
+      <p class="bx-body">
+        You are about to see an example of the <strong>SHORT</strong> duration.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-demo-short-btn">
+          Show Short Example
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bx-screen-demo-long" class="bx-screen">
+    <div class="bx-card">
+      <p class="bx-title">Reference Example 2 of 2</p>
+      <p class="bx-body">
+        You are about to see an example of the <strong>LONG</strong> duration.
+      </p>
+      <div class="bx-screen-actions">
+        <button class="bx-btn bx-btn-primary" id="bx-demo-long-btn">
+          Show Long Example
+        </button>
+      </div>
+    </div>
+  </div>
   <!-- ── POST: brief reminder screen ──────────────────────────── -->
   <div id="bx-screen-post-intro" class="bx-screen">
     <div class="bx-card">
@@ -506,9 +563,23 @@ hr.bx-divider {
   /* =============================================================
      SCREEN MANAGEMENT
      ============================================================= */
-  var allScreens = [
-    elPreIntro, elPostIntro, elTransition, elBreak, elDone, elTaskScreen
-  ];
+var elDemoShort     = document.getElementById('bx-screen-demo-short');
+var elDemoLong      = document.getElementById('bx-screen-demo-long');
+var elDemoShortSeen = document.getElementById('bx-screen-demo-short-seen');
+var elDemoLongSeen  = document.getElementById('bx-screen-demo-long-seen');
+
+var allScreens = [
+  elPreIntro,
+  elDemoShort,
+  elDemoLong,
+  elDemoShortSeen,
+  elDemoLongSeen,
+  elPostIntro,
+  elTransition,
+  elBreak,
+  elDone,
+  elTaskScreen
+];
 
   function showScreen(el) {
     allScreens.forEach(function (s) {
