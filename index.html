@@ -599,7 +599,28 @@ var allScreens = [
   /* =============================================================
      UTILITY — shuffle array in place (Fisher-Yates)
      ============================================================= */
+
+  function runReferenceDemo(durationMs, callback) {
+  showScreen(elTaskScreen);
+  elResponseArea.style.display = 'none';
+  elFeedback.style.display = 'none';
+  elFeedback.innerHTML = '';
+  elFixation.style.display = 'block';
+  elCircle.style.display = 'none';
+
+  setTimeout(function () {
+    elFixation.style.display = 'none';
+    elCircle.style.display = 'block';
+
+    setTimeout(function () {
+      elCircle.style.display = 'none';
+      callback();
+    }, durationMs);
+
+  }, FIXATION_MS);
+}
   function shuffle(arr) {
+
     for (var i = arr.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
@@ -832,13 +853,10 @@ function showTrainingFeedback(trial, correct, callback) {
   /* =============================================================
      INSTRUCTION / TRANSITION BUTTON CLICKS
      ============================================================= */
-  document.getElementById('bx-pre-intro-btn').addEventListener('click', function () {
-    allTrials  = buildTrials();
-    trialIndex = 0;
-    trialData  = [];
-    showScreen(elTaskScreen);
-    advance();
-  });
+  
+document.getElementById('bx-pre-intro-btn').addEventListener('click', function () {
+  showScreen(elDemoShort);
+});
 
   document.getElementById('bx-post-intro-btn').addEventListener('click', function () {
     allTrials  = buildTrials();
