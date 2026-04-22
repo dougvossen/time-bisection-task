@@ -432,31 +432,10 @@ hr.bx-divider {
   There is no right or wrong answer for the in-between trials. Please go with your best judgment.
 </p>
       <p class="bx-body">
-        The task includes a brief rest halfway through.
       </p>
       <div class="bx-screen-actions">
         <button class="bx-btn bx-btn-primary" id="bx-transition-btn">
           Begin Main Task
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Halfway break ─────────────────────────────────────────── -->
-  <div id="bx-screen-break" class="bx-screen">
-    <div class="bx-card">
-      <p class="bx-title">Halfway Point — Optional Break</p>
-      <p class="bx-lead">
-        You are halfway through the main task. Feel free to take a short
-        break before continuing.
-      </p>
-      <p class="bx-body">
-        When you are ready to continue, click the button below.
-        The task will resume exactly where you left off.
-      </p>
-      <div class="bx-screen-actions">
-        <button class="bx-btn bx-btn-primary" id="bx-break-btn">
-          Continue Task
         </button>
       </div>
     </div>
@@ -470,8 +449,7 @@ hr.bx-divider {
         Thank you — you have finished the timing task.
       </p>
       <p class="bx-body">
-        Please click the <strong>Next</strong> button below to continue
-        with the rest of the survey.
+        Please click the <strong>Next</strong> button at the bottom of the page to continue.
       </p>
     </div>
   </div>
@@ -563,7 +541,6 @@ hr.bx-divider {
   var elPreIntro    = document.getElementById('bx-screen-pre-intro');
   var elPostIntro   = document.getElementById('bx-screen-post-intro');
   var elTransition  = document.getElementById('bx-screen-transition');
-  var elBreak       = document.getElementById('bx-screen-break');
   var elDone        = document.getElementById('bx-screen-done');
   var elTaskScreen  = document.getElementById('bx-task-screen');
   var elArena       = document.getElementById('bx-arena');
@@ -593,7 +570,6 @@ var allScreens = [
   elDemoLongSeen,
   elPostIntro,
   elTransition,
-  elBreak,
   elDone,
   elTaskScreen
 ];
@@ -715,13 +691,6 @@ var allScreens = [
       return;
     }
 
-    /* Halfway break */
-    var testsDone = trialIndex - trainCount;
-    if (testsDone === BREAK_AT) {
-      showBreakScreen();
-      return;
-    }
-
     runTrial();
   }
 
@@ -840,19 +809,20 @@ function showTrainingFeedback(trial, correct, callback) {
   function showTransitionScreen() {
     showScreen(elTransition);
   }
-
-  function showBreakScreen() {
-    showScreen(elBreak);
-  }
   
 function finishTask() {
   taskDone = true;
   elTaskData.value = JSON.stringify(trialData);
   console.log('TASK DATA JSON:', elTaskData.value);
-  showScreen(elDone);
-  if (typeof window.onBisectionComplete === 'function') {
-    window.onBisectionComplete();
-  }
+showScreen(elDone);
+
+if (window.Qualtrics && Qualtrics.SurveyEngine) {
+  Qualtrics.SurveyEngine.setEmbeddedData('bisectionData', elTaskData.value);
+}
+
+if (typeof window.onBisectionComplete === 'function') {
+  window.onBisectionComplete();
+}
 }
 
   /* =============================================================
@@ -915,26 +885,17 @@ document.getElementById('bx-transition-btn').addEventListener('click', function 
   runTrial();
 });
 
-document.getElementById('bx-break-btn').addEventListener('click', function () {
-  showScreen(elTaskScreen);
-  runTrial();
-});
-
   /* =============================================================
      SPACE BAR SHORTCUT on transition / break screens
      ============================================================= */
   document.addEventListener('keydown', function (e) {
     if (e.key !== ' ' && e.code !== 'Space') return;
 
-    var transActive = elTransition.classList.contains('active');
-    var breakActive = elBreak.classList.contains('active');
+var transActive = elTransition.classList.contains('active');
 
-    if (transActive) {
-      document.getElementById('bx-transition-btn').click();
-    }
-    if (breakActive) {
-      document.getElementById('bx-break-btn').click();
-    }
+if (transActive) {
+  document.getElementById('bx-transition-btn').click();
+}
   });
 
   /* =============================================================
