@@ -266,12 +266,12 @@ hr.bx-divider {
   /* ---------- screens (instruction / break / done) ---------- */
   .bx-screen { display: none; }
   .bx-screen.active { display: block; }
-  .bx-screen-actions {
-    margin-top: 28px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
+.bx-screen-actions {
+  margin-top: 34px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
   /* ---------- task screen (arena + response) ---------- */
   #bx-task-screen { display: none; }
@@ -420,12 +420,17 @@ hr.bx-divider {
       <p class="bx-lead">
         Good work. You have now seen examples of both reference durations.
       </p>
-      <p class="bx-body">
-        The main task works the same way, but the circle durations will vary
-        from trial to trial. Some will feel clearly short or long; others will
-        fall somewhere in between. There is no right or wrong answer for the
-        in-between ones — just go with your best judgment.
-      </p>
+<p class="bx-body">
+  The main task works the same way, but the circle durations will vary from trial to trial.
+</p>
+
+<p class="bx-body">
+  Some trials will feel clearly short or long. Others will fall somewhere in between.
+</p>
+
+<p class="bx-body">
+  There is no right or wrong answer for the in-between trials. Please go with your best judgment.
+</p>
       <p class="bx-body">
         The task includes a brief rest halfway through.
       </p>
@@ -900,15 +905,15 @@ document.getElementById('bx-demo-long-next-btn').addEventListener('click', funct
     advance();
   });
 
-  document.getElementById('bx-transition-btn').addEventListener('click', function () {
-    showScreen(elTaskScreen);
-    advance();
-  });
+document.getElementById('bx-transition-btn').addEventListener('click', function () {
+  showScreen(elTaskScreen);
+  runTrial();
+});
 
-  document.getElementById('bx-break-btn').addEventListener('click', function () {
-    showScreen(elTaskScreen);
-    advance();
-  });
+document.getElementById('bx-break-btn').addEventListener('click', function () {
+  showScreen(elTaskScreen);
+  runTrial();
+});
 
   /* =============================================================
      SPACE BAR SHORTCUT on transition / break screens
