@@ -904,8 +904,13 @@ document.getElementById('bx-demo-long-next-btn').addEventListener('click', funct
     showScreen(elTaskScreen);
     advance();
   });
-
+  
 document.getElementById('bx-transition-btn').addEventListener('click', function () {
+  alert('transition button clicked');
+
+  // 🔧 reset into main phase properly
+  trialIndex = trainCount;   // start at first TEST trial
+
   showScreen(elTaskScreen);
   runTrial();
 });
