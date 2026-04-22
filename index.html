@@ -849,7 +849,6 @@ function finishTask() {
   taskDone = true;
   elTaskData.value = JSON.stringify(trialData);
   console.log('TASK DATA JSON:', elTaskData.value);
-  alert('Task finished. Trial count: ' + trialData.length);
   showScreen(elDone);
   if (typeof window.onBisectionComplete === 'function') {
     window.onBisectionComplete();
